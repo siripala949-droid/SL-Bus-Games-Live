@@ -1,0 +1,6 @@
+{
+  "name": "Sri Lanka Bus Gaming Live",
+  "description": "Mobile-first live streaming and replay platform for Sri Lanka Bus Simulator gaming creators and viewers.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

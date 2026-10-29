@@ -1,0 +1,301 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive Helpers
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'automakercreation@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation Blueprint: Channel
+    function isValidChannel(data) {
+      return data.keys().hasAll([
+        'ownerId',
+        'channelName',
+        'channelUrl',
+        'avatarUrl',
+        'subscriberText',
+        'receivedGems',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId',
+        'channelName',
+        'channelUrl',
+        'avatarUrl',
+        'subscriberText',
+        'receivedGems',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.channelName is string && data.channelName.size() >= 1 && data.channelName.size() <= 120 &&
+      data.channelUrl is string && data.channelUrl.size() >= 1 && data.channelUrl.size() <= 300 &&
+      data.avatarUrl is string && data.avatarUrl.size() >= 0 && data.avatarUrl.size() <= 500 &&
+      data.subscriberText is string && data.subscriberText.size() >= 0 && data.subscriberText.size() <= 80 &&
+      data.receivedGems is int && data.receivedGems >= 0 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: Stream
+    function isValidStream(data) {
+      return data.keys().hasAll([
+        'videoId',
+        'youtubeUrl',
+        'title',
+        'description',
+        'gameCategory',
+        'creatorId',
+        'creatorName',
+        'creatorChannelUrl',
+        'creatorAvatar',
+        'status',
+        'scheduledFor',
+        'viewerCount',
+        'totalViews',
+        'receivedGems',
+        'startedAt',
+        'endedAt',
+        'thumbnailUrl',
+        'isPublic',
+        'autoSyncYouTube',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'videoId',
+        'youtubeUrl',
+        'title',
+        'description',
+        'gameCategory',
+        'creatorId',
+        'creatorName',
+        'creatorChannelUrl',
+        'creatorAvatar',
+        'status',
+        'scheduledFor',
+        'viewerCount',
+        'totalViews',
+        'receivedGems',
+        'startedAt',
+        'endedAt',
+        'thumbnailUrl',
+        'isPublic',
+        'autoSyncYouTube',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.videoId is string && data.videoId.size() == 11 && data.videoId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.youtubeUrl is string && data.youtubeUrl.size() >= 1 && data.youtubeUrl.size() <= 300 &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 250 &&
+      data.description is string && data.description.size() >= 0 && data.description.size() <= 3000 &&
+      data.gameCategory is string && data.gameCategory.size() >= 1 && data.gameCategory.size() <= 120 &&
+      data.creatorId is string && data.creatorId.size() >= 1 && data.creatorId.size() <= 128 && data.creatorId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.creatorName is string && data.creatorName.size() >= 1 && data.creatorName.size() <= 120 &&
+      data.creatorChannelUrl is string && data.creatorChannelUrl.size() >= 1 && data.creatorChannelUrl.size() <= 300 &&
+      data.creatorAvatar is string && data.creatorAvatar.size() >= 0 && data.creatorAvatar.size() <= 500 &&
+      data.status in ['LIVE', 'UPCOMING', 'PAST'] &&
+      data.scheduledFor is string && data.scheduledFor.size() >= 0 && data.scheduledFor.size() <= 120 &&
+      data.viewerCount is int && data.viewerCount >= 0 &&
+      data.totalViews is int && data.totalViews >= 0 &&
+      data.receivedGems is int && data.receivedGems >= 0 &&
+      data.startedAt is string && data.startedAt.size() >= 0 && data.startedAt.size() <= 120 &&
+      data.endedAt is string && data.endedAt.size() >= 0 && data.endedAt.size() <= 120 &&
+      data.thumbnailUrl is string && data.thumbnailUrl.size() >= 1 && data.thumbnailUrl.size() <= 500 &&
+      data.isPublic is bool &&
+      data.autoSyncYouTube is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: StreamMessage
+    function isValidStreamMessage(data, streamId) {
+      return data.keys().hasAll([
+        'streamId',
+        'senderId',
+        'senderName',
+        'text',
+        'isGift',
+        'giftName',
+        'giftIcon',
+        'giftGems',
+        'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'streamId',
+        'senderId',
+        'senderName',
+        'text',
+        'isGift',
+        'giftName',
+        'giftIcon',
+        'giftGems',
+        'createdAt'
+      ]) &&
+      data.streamId is string && data.streamId == streamId &&
+      data.senderId is string && data.senderId == request.auth.uid && data.senderId.size() >= 1 && data.senderId.size() <= 128 &&
+      data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 100 &&
+      data.text is string && data.text.size() >= 1 && data.text.size() <= 500 &&
+      data.isGift is bool &&
+      data.giftName is string && data.giftName.size() >= 0 && data.giftName.size() <= 60 &&
+      data.giftIcon is string && data.giftIcon.size() >= 0 && data.giftIcon.size() <= 20 &&
+      data.giftGems is int && data.giftGems >= 0 && data.giftGems <= 10000 &&
+      data.createdAt is timestamp;
+    }
+
+    // Collection: /channels/{channelId}
+    match /channels/{channelId} {
+      allow get: if isValidId(channelId) && (
+        existing().ownerId == channelId ||
+        (isSignedIn() && request.auth.uid == channelId)
+      );
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+
+      allow create: if isVerifiedUser() &&
+        isValidId(channelId) &&
+        channelId == request.auth.uid &&
+        isValidChannel(incoming()) &&
+        incoming().ownerId == request.auth.uid &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(channelId) &&
+        isValidChannel(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          // Action 1: Owner updates channel profile details
+          (existing().ownerId == request.auth.uid &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'channelName',
+              'channelUrl',
+              'avatarUrl',
+              'subscriberText',
+              'receivedGems',
+              'updatedAt'
+            ])) ||
+          // Action 2: Viewer gift increments channel receivedGems
+          (incoming().diff(existing()).affectedKeys().hasOnly(['receivedGems', 'updatedAt']) &&
+            incoming().receivedGems > existing().receivedGems)
+        );
+
+      allow delete: if false;
+    }
+
+    // Collection: /streams/{streamId}
+    match /streams/{streamId} {
+      allow get: if isValidId(streamId) && (
+        existing().isPublic == true ||
+        (isSignedIn() && existing().creatorId == request.auth.uid)
+      );
+
+      allow list: if existing().isPublic == true ||
+        (isSignedIn() && existing().creatorId == request.auth.uid);
+
+      allow create: if isVerifiedUser() &&
+        isValidId(streamId) &&
+        isValidStream(incoming()) &&
+        (incoming().creatorId == request.auth.uid || isAdmin()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(streamId) &&
+        isValidStream(incoming()) &&
+        incoming().videoId == existing().videoId &&
+        incoming().creatorId == existing().creatorId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          isAdmin() ||
+          // Action 1: Creator updates stream details, visibility, or status
+          (existing().creatorId == request.auth.uid &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'title',
+              'description',
+              'gameCategory',
+              'creatorName',
+              'creatorChannelUrl',
+              'creatorAvatar',
+              'status',
+              'scheduledFor',
+              'viewerCount',
+              'totalViews',
+              'startedAt',
+              'endedAt',
+              'thumbnailUrl',
+              'isPublic',
+              'autoSyncYouTube',
+              'updatedAt'
+            ])) ||
+          // Action 2: Viewer gift increments stream receivedGems
+          (incoming().diff(existing()).affectedKeys().hasOnly(['receivedGems', 'updatedAt']) &&
+            incoming().receivedGems > existing().receivedGems) ||
+          // Action 3: Auto-Sync updates YouTube live/past status & view count
+          (existing().autoSyncYouTube == true &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'title',
+              'description',
+              'status',
+              'viewerCount',
+              'totalViews',
+              'startedAt',
+              'endedAt',
+              'thumbnailUrl',
+              'updatedAt'
+            ]))
+        );
+
+      allow delete: if isVerifiedUser() &&
+        isValidId(streamId) &&
+        (existing().creatorId == request.auth.uid || isAdmin());
+
+      // Subcollection: /streams/{streamId}/messages/{messageId}
+      match /messages/{messageId} {
+        allow get: if isValidId(streamId) && isValidId(messageId) &&
+          get(/databases/$(database)/documents/streams/$(streamId)).data.isPublic == true;
+
+        allow list: if existing().streamId == streamId;
+
+        allow create: if isVerifiedUser() &&
+          isValidId(streamId) &&
+          isValidId(messageId) &&
+          isValidStreamMessage(incoming(), streamId) &&
+          incoming().createdAt == request.time &&
+          exists(/databases/$(database)/documents/streams/$(streamId));
+
+        allow update, delete: if false;
+      }
+    }
+  }
+}

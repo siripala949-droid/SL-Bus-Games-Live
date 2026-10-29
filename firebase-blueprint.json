@@ -1,0 +1,300 @@
+{
+  "entities": {
+    "Channel": {
+      "title": "Channel",
+      "description": "A connected YouTube creator channel profile linked to a Firebase authenticated Google user.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the channel owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "channelName": {
+          "type": "string",
+          "description": "Public YouTube channel display name.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "channelUrl": {
+          "type": "string",
+          "description": "Public YouTube channel URL.",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "avatarUrl": {
+          "type": "string",
+          "description": "Public YouTube channel avatar URL.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "subscriberText": {
+          "type": "string",
+          "description": "Subscriber count display label.",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "receivedGems": {
+          "type": "integer",
+          "description": "Total virtual gems received by this channel."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the channel profile was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the channel profile was last updated."
+        }
+      },
+      "required": [
+        "ownerId",
+        "channelName",
+        "channelUrl",
+        "avatarUrl",
+        "subscriberText",
+        "receivedGems",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Stream": {
+      "title": "Stream",
+      "description": "A public YouTube broadcast (LIVE, UPCOMING, or PAST) published to Sri Lanka Bus Gaming Live.",
+      "type": "object",
+      "properties": {
+        "videoId": {
+          "type": "string",
+          "description": "11-character YouTube video ID.",
+          "minLength": 11,
+          "maxLength": 11,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "youtubeUrl": {
+          "type": "string",
+          "description": "Full YouTube live or watch URL.",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "title": {
+          "type": "string",
+          "description": "YouTube broadcast title.",
+          "minLength": 1,
+          "maxLength": 250
+        },
+        "description": {
+          "type": "string",
+          "description": "YouTube broadcast description.",
+          "minLength": 0,
+          "maxLength": 3000
+        },
+        "gameCategory": {
+          "type": "string",
+          "description": "Game or event category label.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "creatorId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the creator who published this stream.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "creatorName": {
+          "type": "string",
+          "description": "YouTube channel name of the creator.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "creatorChannelUrl": {
+          "type": "string",
+          "description": "YouTube channel URL of the creator.",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "creatorAvatar": {
+          "type": "string",
+          "description": "Avatar image URL of the creator.",
+          "minLength": 0,
+          "maxLength": 500
+        },
+        "status": {
+          "type": "string",
+          "description": "Broadcast status: LIVE, UPCOMING, or PAST.",
+          "enum": ["LIVE", "UPCOMING", "PAST"]
+        },
+        "scheduledFor": {
+          "type": "string",
+          "description": "Scheduled start time label for UPCOMING streams.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "viewerCount": {
+          "type": "integer",
+          "description": "Current live viewers count."
+        },
+        "totalViews": {
+          "type": "integer",
+          "description": "Total YouTube views count."
+        },
+        "receivedGems": {
+          "type": "integer",
+          "description": "Total virtual gems gifted to this stream."
+        },
+        "startedAt": {
+          "type": "string",
+          "description": "Display text for when the stream started.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "endedAt": {
+          "type": "string",
+          "description": "Display text for when the stream ended.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "thumbnailUrl": {
+          "type": "string",
+          "description": "Real YouTube video thumbnail URL.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "isPublic": {
+          "type": "boolean",
+          "description": "Whether this stream is visible in the public feed."
+        },
+        "autoSyncYouTube": {
+          "type": "boolean",
+          "description": "Whether this stream automatically syncs live/upcoming/past status from YouTube."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the stream record was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the stream record was last updated."
+        }
+      },
+      "required": [
+        "videoId",
+        "youtubeUrl",
+        "title",
+        "description",
+        "gameCategory",
+        "creatorId",
+        "creatorName",
+        "creatorChannelUrl",
+        "creatorAvatar",
+        "status",
+        "scheduledFor",
+        "viewerCount",
+        "totalViews",
+        "receivedGems",
+        "startedAt",
+        "endedAt",
+        "thumbnailUrl",
+        "isPublic",
+        "autoSyncYouTube",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StreamMessage": {
+      "title": "StreamMessage",
+      "description": "A live chat or virtual gift message posted inside a stream's Watch Room.",
+      "type": "object",
+      "properties": {
+        "streamId": {
+          "type": "string",
+          "description": "Parent stream document ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the message sender.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "senderName": {
+          "type": "string",
+          "description": "Display name of the message sender.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "text": {
+          "type": "string",
+          "description": "Chat message content.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "isGift": {
+          "type": "boolean",
+          "description": "True if this message represents a virtual gift."
+        },
+        "giftName": {
+          "type": "string",
+          "description": "Name of the virtual gift if isGift is true.",
+          "minLength": 0,
+          "maxLength": 60
+        },
+        "giftIcon": {
+          "type": "string",
+          "description": "Emoji icon of the gift.",
+          "minLength": 0,
+          "maxLength": 20
+        },
+        "giftGems": {
+          "type": "integer",
+          "description": "Gem value of the gift."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the message was sent."
+        }
+      },
+      "required": [
+        "streamId",
+        "senderId",
+        "senderName",
+        "text",
+        "isGift",
+        "giftName",
+        "giftIcon",
+        "giftGems",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/channels/{channelId}": {
+      "schema": {
+        "$ref": "#/entities/Channel"
+      },
+      "description": "Stores connected YouTube creator channel profiles indexed by the owner's Firebase Auth UID."
+    },
+    "/streams/{streamId}": {
+      "schema": {
+        "$ref": "#/entities/Stream"
+      },
+      "description": "Stores public YouTube Live, Upcoming Live, and Past Live broadcasts."
+    },
+    "/streams/{streamId}/messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/StreamMessage"
+      },
+      "description": "Stores live chat messages and virtual gift announcements for a specific stream."
+    }
+  }
+}
